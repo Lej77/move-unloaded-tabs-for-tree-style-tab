@@ -1,0 +1,8 @@
+{
+    "options_PreventOnlyUnloadedTabs": {
+        "message": "Only prevent unloaded tabs from becoming active when dragged."
+    },
+    "options_PreventLongPresses": {
+        "message": "Don't prevent long pressed tabs from becoming active. A tab is long pressed if the time between the \"mouse down\" event and the \"mouse up\" event is longer than 400ms."
+    }
+}

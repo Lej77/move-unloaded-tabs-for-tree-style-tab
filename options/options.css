@@ -1,0 +1,14 @@
+
+*[class*='message'] {
+    white-space: pre-line;
+}
+.textSelectable {
+    -moz-user-select: text;
+}
+.textNotSelectable {
+    -moz-user-select: none;
+}
+
+.tstInstructions {
+    margin-bottom: 30px;
+}
