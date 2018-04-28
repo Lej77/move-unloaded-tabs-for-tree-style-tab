@@ -14,12 +14,16 @@ function applySettingChanges(target, changes) {
   }
 }
 browser.storage.onChanged.addListener((changes, areaName) => {
+  applySettingChanges(settings, changes);
   if (changed) {
     applySettingChanges(changed, changes);
+  } else {
+    if (changes.detectLongPressedTabs) {
+      registerToTST();
+    }
   }
-  applySettingChanges(settings, changes);
 });
-browser.storage.local.get(null).then((value) => {
+let settingsLoaded = browser.storage.local.get(null).then((value) => {
   let changedKeys = Object.keys(changed);
   for (let key of Object.keys(value)) {
     if (!changedKeys.includes(key)) {
@@ -31,11 +35,15 @@ browser.storage.local.get(null).then((value) => {
 
 async function registerToTST() {
   try {
-    await browser.runtime.sendMessage(kTST_ID, {
+    let registrationDetails = {
       type: 'register-self',
       name: browser.runtime.getManifest().name,
-      listeningTypes: ['tab-mousedown', 'tab-mouseup', 'tab-dragready'],
-    });
+      listeningTypes: ['tab-mousedown', 'tab-mouseup'],
+    };
+    if (settings.detectLongPressedTabs) {
+      registrationDetails.listeningTypes.push('tab-dragready');
+    }
+    await browser.runtime.sendMessage(kTST_ID, registrationDetails);
   } catch (error) { return false; }
   return true;
 }
@@ -55,7 +63,8 @@ browser.runtime.onMessageExternal.addListener((aMessage, aSender) => {
   }
   switch (aMessage.type) {
     case 'ready': {
-      registerToTST(); // passive registration for secondary (or after) startup
+      // passive registration for secondary (or after) startup:
+      registerToTST();
       return Promise.resolve(true);
     } break;
     case 'tab-mousedown': {
@@ -80,13 +89,22 @@ browser.runtime.onMessageExternal.addListener((aMessage, aSender) => {
       resolveAs(!releasedWithoutMove);
     } break;
     case 'tab-dragready': {
+      if (!settings.detectLongPressedTabs) {
+        break;
+      }
       if (settings.preventOnlyForUnloadedTabs && !aMessage.tab.discarded) {
         resolveAs(true);
         break;
       }
-      resolveAs(!settings.allowLongPressedTabs);
+      resolveAs(settings.preventLongPressedTabs);
     } break;
   }
   return Promise.resolve(false);
 });
-registerToTST(); // aggressive registration on initial installation
+
+settingsLoaded.finally(() => {
+  // aggressive registration on initial installation:
+  if (!registerToTST()) {
+    setTimeout(registerToTST, 5000);
+  }
+});

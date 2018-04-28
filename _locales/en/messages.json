@@ -2,7 +2,10 @@
     "options_PreventOnlyUnloadedTabs": {
         "message": "Only prevent unloaded tabs from becoming active when dragged."
     },
-    "options_PreventLongPresses": {
-        "message": "Don't prevent long pressed tabs from becoming active. A tab is long pressed if the time between the \"mouse down\" event and the \"mouse up\" event is longer than 400ms."
+    "options_DetectLongPress": {
+        "message": "Detect if a tab is long pressed. If there are listeners to this Tree Style Tab API event then a long pressed tab cannot be dragged. A tab is long pressed if the time between the \"mouse down\" event and the \"mouse up\" event is longer than 400ms."
+    },
+    "options_PreventOnLongPress": {
+        "message": "Prevent long pressed tabs from becoming active. (This option only takes affect if the detect option is checked.)"
     }
 }

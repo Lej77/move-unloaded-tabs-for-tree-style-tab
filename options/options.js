@@ -55,7 +55,8 @@ async function initiatePage() {
     for (let idElement of allIdElements) {
         obj[idElement.id] = idElement.type === 'checkbox' ? idElement.checked : idElement.value;
     }
-    let settings = await browser.storage.local.get(obj);
+    let settings = await browser.storage.local.get(null);
+    settings = Object.assign(obj, settings);
     bindElementIdsToSettings(settings);
 }
 initiatePage();
