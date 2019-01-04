@@ -1,11 +1,53 @@
 {
+    "options_section_LongPress": {
+        "message": "Long pressed tabs"
+    },
+    "options_section_LongPress_PreventDragAndDrop": {
+        "message": "Prevent drag and drop"
+    },
+    "options_section_DragAndDrop": {
+        "message": "Drag and dropped tabs"
+    },
+    "options_section_CustomDrag": {
+        "message": "Custom dragged tabs"
+    },
     "options_PreventOnlyUnloadedTabs": {
-        "message": "Only prevent unloaded tabs from becoming active when dragged."
+        "message": "Ignore clicks on loaded tabs and only prevent unloaded tabs from becoming active."
     },
     "options_DetectLongPress": {
-        "message": "Detect if a tab is long pressed. If there are listeners to this Tree Style Tab API event then a long pressed tab cannot be dragged. A tab is long pressed if the time between the \"mouse down\" event and the \"mouse up\" event is longer than 400ms."
+        "message": "Detect if a tab is long pressed."
+    },
+    "options_longPressTimeInMilliseconds": {
+        "message": "Time between \"mouse down\" and \"mouse up\" events for a click to register as a long press: "
+    },
+    "options_preventDragAndDropAfterLongPress": {
+        "message": "Prevent long pressed tabs from being drag and dropped."
+    },
+    "options_preventDragAndDropAfterLongPress_Legacy": {
+        "message": "Use older method of stopping long pressed tabs from being drag and dropped. This should be used if the Tree Style Tab version is 2.7.7 or earlier. When this method is used the time between the \"mouse down\" event and the \"mouse up\" event is controller by Tree Style Tab and it defaults to 400ms."
     },
     "options_PreventOnLongPress": {
-        "message": "Prevent long pressed tabs from becoming active. (This option only takes affect if the detect option is checked.)"
+        "message": "Prevent long pressed tabs from becoming active. Otherwise long pressed tabs should always become active."
+    },
+    "options_detectDragAndDrop": {
+        "message": "Detect if a drag and drop operation is started for the clicked tab. (Requires Tree Style Tab version 2.7.8 or later.)"
+    },
+    "options_preventDragAndDroppedTabs": {
+        "message": "Prevent drag and dropped tabs from becoming active. Otherwise drag and dropped tabs should always become active."
+    },
+    "options_detectCustomDrag": {
+        "message": "Detect if a drag operation is started by another addon for the the clicked tab. The operation is started when the mouse is moved over to another tab and an addon overrides normal drag and drop behavior. An addon that can trigger this event is <a href=\"https://addons.mozilla.org/firefox/addon/multiple-tab-handler/\">Multiple Tab Handler</a> which allows selecting multiple tabs by long pressing a tab and then dragging to select more."
+    },
+    "options_preventCustomDraggedTabs": {
+        "message": "Prevent custom dragged tabs from becoming active. Otherwise custom dragged tabs should always become active."
+    },
+    "options_Milliseconds": {
+        "message": "milliseconds."
+    },
+    "options_resetSettings": {
+        "message": "Reset Settings"
+    },
+    "options_resetSettings_Prompt": {
+        "message": "Do you want to reset all settings to default values?"
     }
 }

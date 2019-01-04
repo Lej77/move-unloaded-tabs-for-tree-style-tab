@@ -1,3 +1,7 @@
+body {
+    font-size: 1.2em;
+}
+
 
 *[class*='message'] {
     white-space: pre-line;
@@ -11,4 +15,15 @@
 
 .tstInstructions {
     margin-bottom: 30px;
+}
+
+.disabled {
+    opacity: 0.6;
+}
+.disabled .disabled {
+    opacity: 1;
+}
+
+#resetSettingsButton {
+    padding: 10px;
 }

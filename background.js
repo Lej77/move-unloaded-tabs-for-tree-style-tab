@@ -2,15 +2,29 @@
 const kTST_ID = 'treestyletab@piro.sakura.ne.jp';
 
 
-var settings = {};
+// #region Settings
+
+const settings = getDefaultSettings();
 let changed = {};
-function applySettingChanges(target, changes) {
-  for (let key of Object.keys(changes)) {
-    if (Object.keys(changes[key]).includes('newValue')) {
-      target[key] = changes[key].newValue;
-    } else {
-      delete target[key];
+function applySettingChanges(target, changes, fallbackToDefault = true) {
+  try {
+    let defaultSettings = null;
+    for (const [key, value] of Object.entries(changes)) {
+      if ('newValue' in value) {
+        target[key] = value.newValue;
+      } else {
+        if (fallbackToDefault) {
+          if (!defaultSettings) {
+            defaultSettings = getDefaultSettings();
+          }
+          target[key] = defaultSettings[key];
+        } else {
+          delete target[key];
+        }
+      }
     }
+  } catch (error) {
+    console.error('Failed to update settings!\n', error);
   }
 }
 browser.storage.onChanged.addListener((changes, areaName) => {
@@ -18,12 +32,18 @@ browser.storage.onChanged.addListener((changes, areaName) => {
   if (changed) {
     applySettingChanges(changed, changes);
   } else {
-    if (changes.detectLongPressedTabs) {
+    if (
+      changes.detectDragAndDrop ||
+      changes.detectCustomDrag ||
+      changes.detectLongPressedTabs ||
+      changes.preventDragAndDropAfterLongPress ||
+      changes.preventDragAndDropAfterLongPress_Legacy
+    ) {
       registerToTST();
     }
   }
 });
-let settingsLoaded = browser.storage.local.get(null).then((value) => {
+const settingsLoaded = browser.storage.local.get(null).then((value) => {
   let changedKeys = Object.keys(changed);
   for (let key of Object.keys(value)) {
     if (!changedKeys.includes(key)) {
@@ -33,74 +53,164 @@ let settingsLoaded = browser.storage.local.get(null).then((value) => {
   changed = null;
 });
 
+// #endregion Settings
+
+
+// #region Tree Style Tab
+
 async function registerToTST() {
   try {
-    let registrationDetails = {
+    await unregisterFromTST();
+
+    const listeningTypes = ['ready', 'tab-mousedown', 'tab-mouseup'];
+
+    if (settings.detectDragAndDrop) {
+      listeningTypes.push('native-tab-dragstart'); // Drag and drop of tab started.
+    }
+    if (settings.detectCustomDrag) {
+      listeningTypes.push('tab-dragstart');   // Drag and drop of tab was prevented in favour of custom drag handling by some addon.
+    }
+    if (settings.detectLongPressedTabs && settings.preventDragAndDropAfterLongPress && settings.preventDragAndDropAfterLongPress_Legacy) {
+      listeningTypes.push('tab-dragready');   // If tab is long pressed (time is configured from TST's hidden debug settings and defaults to 400ms) than prevent drag and drop in favour of custom drag handling.      
+    }
+
+    const registrationDetails = {
       type: 'register-self',
       name: browser.runtime.getManifest().name,
-      listeningTypes: ['tab-mousedown', 'tab-mouseup'],
+      listeningTypes,
     };
-    if (settings.detectLongPressedTabs) {
-      registrationDetails.listeningTypes.push('tab-dragready');
-    }
     await browser.runtime.sendMessage(kTST_ID, registrationDetails);
   } catch (error) { return false; }
   return true;
 }
+async function unregisterFromTST() {
+  try {
+    await browser.runtime.sendMessage(kTST_ID, {
+      type: 'unregister-self'
+    });
+  }
+  catch (e) {
+    // TST is not available
+    return false;
+  }
+  return true;
+}
 
-var lastResolve = null;
+// #endregion Tree Style Tab
+
+
+// #region Handle Tree Style Tab Event
+
+let lastResolve = null;
+let longPressTimeoutId = null;
 function resolveAs(value) {
   if (lastResolve && typeof lastResolve === 'function') {
     lastResolve(value);
   }
   lastResolve = null;
+
+  if (longPressTimeoutId !== null) {
+    clearTimeout(longPressTimeoutId);
+  }
+  longPressTimeoutId = null;
 }
 
-var lastMessage;
-browser.runtime.onMessageExternal.addListener((aMessage, aSender) => {
-  if (aSender.id !== kTST_ID) {
+let lastMessage;
+let lastPromise;
+function handleLongPress(preventDragAndDrop, preventActive) {
+  if (preventDragAndDrop) {
+    browser.runtime.sendMessage(kTST_ID, { type: 'start-custom-drag', windowId: lastMessage.windowId });
+  }
+  if (preventActive) {
+    const resolve = lastResolve;
+    if (resolve) {
+      lastResolve = () => resolve(true);
+    }
+  } else {
+    resolveAs(false);
+  }
+}
+
+browser.runtime.onMessageExternal.addListener((message, sender) => {
+  if (sender.id !== kTST_ID) {
     return;
   }
-  switch (aMessage.type) {
+  switch (message.type) {
     case 'ready': {
       // passive registration for secondary (or after) startup:
       registerToTST();
       return Promise.resolve(true);
     } break;
     case 'tab-mousedown': {
-      if (aMessage.button !== 0) {
+      if (message.button !== 0) {
         break;
       }
-      if (settings.preventOnlyForUnloadedTabs && !aMessage.tab.discarded) {
-        resolveAs(true);
+      lastPromise = null;
+      resolveAs(true);  // Ensure last click doesn't select a tab.
+      if (message.closebox || message.soundButton || message.twisty) {
         break;
       }
-      return new Promise((resolve, reject) => {
+      if (settings.preventOnlyForUnloadedTabs && !message.tab.discarded) {
+        break;
+      }
+      const aPromise = new Promise((resolve, reject) => {
         resolveAs(true);
         lastResolve = resolve;
-        lastMessage = aMessage;
+        lastMessage = message;
+        if (
+          settings.detectLongPressedTabs &&
+          // Not using legacy long press detection:
+          !(settings.preventDragAndDropAfterLongPress && settings.preventDragAndDropAfterLongPress_Legacy)
+        ) {
+          longPressTimeoutId = setTimeout(() => {
+            longPressTimeoutId = null;
+            if (settings.detectLongPressedTabs) {
+              handleLongPress(settings.preventDragAndDropAfterLongPress && !settings.preventDragAndDropAfterLongPress_Legacy, settings.preventLongPressedTabs);
+            }
+          }, settings.longPressTimeInMilliseconds);
+        }
       });
+      lastPromise = aPromise;
+      return aPromise;
     } break;
     case 'tab-mouseup': {
-      if (aMessage.button !== 0) {
+      if (message.button !== 0) {
         break;
       }
-      let releasedWithoutMove = lastMessage && aMessage.tab.id === lastMessage.tab.id;
+      const releasedWithoutMove = lastMessage && message.tab.id === lastMessage.tab.id;
+      const aPromise = lastPromise;
+      lastPromise = null;
       resolveAs(!releasedWithoutMove);
+      if (aPromise) {
+        return aPromise;
+      }
+    } break;
+    case 'native-tab-dragstart': {
+      // Drag and drop of tab started (available in TST 2.7.8 and later):
+      if (!settings.detectDragAndDrop) {
+        break;
+      }
+      resolveAs(settings.preventDragAndDroppedTabs);  // Prevent tab from becoming active.
     } break;
     case 'tab-dragready': {
-      if (!settings.detectLongPressedTabs) {
+      if (!settings.detectLongPressedTabs || !settings.preventDragAndDropAfterLongPress || !settings.preventDragAndDropAfterLongPress_Legacy) {
         break;
       }
-      if (settings.preventOnlyForUnloadedTabs && !aMessage.tab.discarded) {
-        resolveAs(true);
+      handleLongPress(true, settings.preventLongPressedTabs);
+    } break;
+    case 'tab-dragstart': {
+      // Drag and drop of tab was prevented in favour of custom drag handling by some addon and mouse has moved over to another tab:
+      if (!settings.detectCustomDrag) {
         break;
       }
-      resolveAs(settings.preventLongPressedTabs);
+      resolveAs(settings.preventCustomDraggedTabs);  // Prevent tab from becoming active.
     } break;
   }
   return Promise.resolve(false);
 });
+
+// #endregion Handle Tree Style Tab Event
+
 
 settingsLoaded.finally(() => {
   // aggressive registration on initial installation:

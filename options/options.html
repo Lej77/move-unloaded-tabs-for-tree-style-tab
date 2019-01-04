@@ -1,27 +1,103 @@
 <head>
     <meta charset="utf-8">
+    <script type="application/javascript" src="/common.js"></script>
     <link rel="stylesheet" type="text/css" href="options.css">
 </head>
 
 <body>
     <div>
-        <label>
-            <input id="preventOnlyForUnloadedTabs" type="checkbox">
-            <text class="message_options_PreventOnlyUnloadedTabs"></text>
-        </label>
+        <div>
+            <label>
+                <input id="preventOnlyForUnloadedTabs" type="checkbox">
+                <text class="message-options_PreventOnlyUnloadedTabs"></text>
+            </label>
+        </div>
         <br />
+
+        <fieldset>
+            <legend class="message-options_section_LongPress"></legend>
+            <div>
+                <label>
+                    <input id="detectLongPressedTabs" type="checkbox">
+                    <text class="message-options_DetectLongPress"></text>
+                </label>
+            </div>
+
+            <div class="requires-detectLongPressedTabs">
+                <p class="requires-!preventDragAndDropAfterLongPress_Legacy">
+                    <span class="message-options_longPressTimeInMilliseconds"></span>
+                    <input id="longPressTimeInMilliseconds" type="number" min="0">
+                    <span class="message-options_Milliseconds"></span>
+                </p>
+
+                <fieldset>
+                    <legend class="message-options_section_LongPress_PreventDragAndDrop"></legend>
+                    <div>
+                        <label>
+                            <input id="preventDragAndDropAfterLongPress" type="checkbox">
+                            <text class="message-options_preventDragAndDropAfterLongPress"></text>
+                        </label>
+                    </div>
+                    <br />
+
+                    <div class="requires-preventDragAndDropAfterLongPress">
+                        <label>
+                            <input id="preventDragAndDropAfterLongPress_Legacy" type="checkbox">
+                            <text class="message-options_preventDragAndDropAfterLongPress_Legacy"></text>
+                        </label>
+                    </div>
+                </fieldset>
+                <br />
+
+                <div>
+                    <label>
+                        <input id="preventLongPressedTabs" type="checkbox">
+                        <text class="message-options_PreventOnLongPress"></text>
+                    </label>
+                </div>
+            </div>
+        </fieldset>
         <br />
+
+        <fieldset>
+            <legend class="message-options_section_DragAndDrop"></legend>
+            <div>
+                <label>
+                    <input id="detectDragAndDrop" type="checkbox">
+                    <text class="message-options_detectDragAndDrop"></text>
+                </label>
+            </div>
+            <br />
+
+            <div class="requires-detectDragAndDrop">
+                <label>
+                    <input id="preventDragAndDroppedTabs" type="checkbox">
+                    <text class="message-options_preventDragAndDroppedTabs"></text>
+                </label>
+            </div>
+        </fieldset>
         <br />
-        <label>
-            <input id="detectLongPressedTabs" type="checkbox">
-            <text class="message_options_DetectLongPress"></text>
-        </label>
+
+        <fieldset>
+            <legend class="message-options_section_CustomDrag"></legend>
+            <div>
+                <label>
+                    <input id="detectCustomDrag" type="checkbox">
+                    <text class="message-options_detectCustomDrag"></text>
+                </label>
+            </div>
+            <br />
+
+            <div class="requires-detectCustomDrag">
+                <label>
+                    <input id="preventCustomDraggedTabs" type="checkbox">
+                    <text class="message-options_preventCustomDraggedTabs"></text>
+                </label>
+            </div>
+        </fieldset>
         <br />
-        <br />
-        <label>
-            <input id="preventLongPressedTabs" type="checkbox">
-            <text class="message_options_PreventOnLongPress"></text>
-        </label>
+
+        <button id="resetSettingsButton" class="message-options_resetSettings"></button>
     </div>
     <script src="options.js"></script>
 </body>
