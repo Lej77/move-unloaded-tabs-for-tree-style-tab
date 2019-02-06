@@ -155,7 +155,15 @@ browser.runtime.onMessageExternal.addListener((message, sender) => {
       }
       const aPromise = new Promise((resolve, reject) => {
         resolveAs(true);
-        lastResolve = resolve;
+        lastResolve = (value) => {
+          if (value) {
+            // If block tab select then wait to notify TST about it since that can cause issues with users of the drag APIs such as Multiple Tab Handler.
+            // This shouldn't make a difference to the user since tab select is blocked while TST waits for the response anyway.
+            setTimeout(() => resolve(value), 5000);
+          } else {
+            resolve(value);
+          }
+        };
         lastMessage = message;
         if (
           settings.detectLongPressedTabs &&
