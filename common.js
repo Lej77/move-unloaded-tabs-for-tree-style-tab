@@ -13,5 +13,7 @@ function getDefaultSettings() {
 
         detectCustomDrag: true,
         preventCustomDraggedTabs: true,
+
+        requestPermissionsFromTST: false,
     };
 }

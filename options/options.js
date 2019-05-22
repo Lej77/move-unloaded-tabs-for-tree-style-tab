@@ -155,7 +155,7 @@ async function initiatePage() {
         for (const [key, value] of Object.entries(changes)) {
             settings[key] = ('newValue' in value) ? value.newValue : defaultSettings[key];
         }
-        updateDisabled(changes);
+        checkRequired(changes);
     });
 
     document.getElementById('resetSettingsButton').addEventListener('click', async (e) => {
@@ -168,7 +168,7 @@ async function initiatePage() {
         await browser.storage.local.clear();
 
         // Reload settings:
-        handleLoad();
+        setTimeout(handleLoad, 250);
     });
 }
 initiatePage();

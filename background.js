@@ -30,6 +30,7 @@ function applySettingChanges(target, changes, fallbackToDefault = true) {
 browser.storage.onChanged.addListener((changes, areaName) => {
   applySettingChanges(settings, changes);
   if (changed) {
+    // Settings not loaded yet:
     applySettingChanges(changed, changes);
   } else {
     if (
@@ -37,7 +38,8 @@ browser.storage.onChanged.addListener((changes, areaName) => {
       changes.detectCustomDrag ||
       changes.detectLongPressedTabs ||
       changes.preventDragAndDropAfterLongPress ||
-      changes.preventDragAndDropAfterLongPress_Legacy
+      changes.preventDragAndDropAfterLongPress_Legacy ||
+      changes.requestPermissionsFromTST
     ) {
       registerToTST();
     }
@@ -78,7 +80,12 @@ async function registerToTST() {
       type: 'register-self',
       name: browser.runtime.getManifest().name,
       listeningTypes,
-    };
+    };    
+    if (settings.requestPermissionsFromTST) {
+      // Get "tabs" permission to skip getting tab info from Firefox when some settings are used.
+      registrationDetails.permissions = ["tabs"];
+    }
+
     await browser.runtime.sendMessage(kTST_ID, registrationDetails);
   } catch (error) { return false; }
   return true;
@@ -150,10 +157,20 @@ browser.runtime.onMessageExternal.addListener((message, sender) => {
       if (message.closebox || message.soundButton || message.twisty) {
         break;
       }
-      if (settings.preventOnlyForUnloadedTabs && !message.tab.discarded) {
-        break;
+      let checkTab = null;
+      if (settings.preventOnlyForUnloadedTabs) {
+        if ('discarded' in message.tab) {
+          // Tree Style Tab provided basic "tabs.Tab" properties:
+          if (!message.tab.discarded)
+            break;
+        } else {
+          // Tree Style Tab didn't provide us with basic "tabs.Tab" properties:
+          checkTab = (tab) => {
+            return !tab.discarded;
+          };
+        }
       }
-      const aPromise = new Promise((resolve, reject) => {
+      let aPromise = new Promise((resolve, reject) => {
         resolveAs(true);
         lastResolve = (value) => {
           if (value) {
@@ -178,6 +195,27 @@ browser.runtime.onMessageExternal.addListener((message, sender) => {
           }, settings.longPressTimeInMilliseconds);
         }
       });
+      if (checkTab) {
+        // Get tab info from Firefox before allowing tab selection to be blocked:
+        const checkingTabPromise = (async () => {
+          try {
+            const tab = await browser.tabs.get(message.tab.id);
+            const skipTab = checkTab(tab);
+            if (skipTab) {
+              resolveAs(false);
+            }
+            return skipTab;
+          } catch (error) {
+            console.error("Failed to get tab from Firefox. \nTabId:", message.tab.id, "\nError:\n", error);
+          }
+          return false;
+        })();
+        aPromise = aPromise.then(async (value) => {
+          const skipTab = await checkingTabPromise;
+          if (skipTab) return false;
+          else return value;
+        });
+      }
       lastPromise = aPromise;
       return aPromise;
     } break;

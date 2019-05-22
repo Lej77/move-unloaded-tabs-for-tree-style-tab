@@ -41,6 +41,9 @@
     "options_preventCustomDraggedTabs": {
         "message": "Prevent custom dragged tabs from becoming active. Otherwise custom dragged tabs should always become active."
     },
+    "options_requestPermissionsFromTST": {
+        "message": "Request some permissions from Tree Style Tab for better performance. This will only affect performance when some settings are enabled. Specifically it will have an effect when tab information is required to make a decision. Such information is for example needed when only loaded tabs should be blocked from being selected."
+    },
     "options_Milliseconds": {
         "message": "milliseconds."
     },
