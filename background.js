@@ -150,10 +150,11 @@ browser.runtime.onMessageExternal.addListener((message, sender) => {
       if (message.closebox || message.soundButton || message.twisty) {
         break;
       }
-      if (settings.preventOnlyForUnloadedTabs && !message.tab.discarded) {
-        break;
-      }
-      const aPromise = new Promise((resolve, reject) => {
+      const aPromise = new Promise(async (resolve, reject) => {
+        const tab = await browser.tabs.get(message.tab.id);
+        if (settings.preventOnlyForUnloadedTabs && !tab.discarded) {
+          return resolve(false);
+        }
         resolveAs(true);
         lastResolve = (value) => {
           if (value) {
