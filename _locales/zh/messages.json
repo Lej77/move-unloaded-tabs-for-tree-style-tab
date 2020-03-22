@@ -32,7 +32,7 @@
         "hash": "2b124eca37ddca4d7b7ff0cdb05dfcca"
     },
     "options_preventDragAndDropAfterLongPress_Legacy": {
-        "message": "使用较旧的方法来阻止长按状态下的标签页被拖放。如果 树状标签页 的版本为 2.7.7 或者更早，则此项应该被使用。当该方法被使用时， “鼠标按下” 和 “鼠标松开” 事件的间隔时间，会交由 树状标签页 来控制，默认会被设置到 400 毫秒。",
+        "message": "使用较旧的方法来阻止长按状态下的标签页被拖放。如果 Tree Style Tab 的版本为 2.7.7 或者更早，则此项应该被使用。当该方法被使用时， “鼠标按下” 和 “鼠标松开” 事件的间隔时间，会交由 Tree Style Tab 来控制，默认会被设置到 400 毫秒。",
         "hash": "4b095d3bc86fcfc5b69d492407c63551"
     },
     "options_PreventOnLongPress": {
@@ -40,7 +40,7 @@
         "hash": "ea93ba3446f529b4ff4f47a9368a25fd"
     },
     "options_detectDragAndDrop": {
-        "message": "当一个标签页被点击时，检测其是否已开始拖放操作。（这需要 树状标签页 版本为 2.7.8 或者更高）",
+        "message": "当一个标签页被点击时，检测其是否已开始拖放操作。（这需要 Tree Style Tab 版本为 2.7.8 或者更高。）",
         "hash": "ad19c4740516985a3f0d815240e99f83"
     },
     "options_preventDragAndDroppedTabs": {
@@ -48,7 +48,7 @@
         "hash": "ddd4f6c8b169b8df445cc65a1db53d47"
     },
     "options_detectCustomDrag": {
-        "message": "当标签页被点击时，检测是否有其它附加组件对其开始了拖动操作。当鼠标被移到另一个标签页，且有附加组件覆盖了正常的拖放行为时，该操作会被开启。一个可以触发此事件的附加组件为 <a href=\"https://addons.mozilla.org/firefox/addon/multiple-tab-handler/\">多标签页处理</a> ，其允许通过长按一个标签页然后进行拖动来选中多个标签页。",
+        "message": "当标签页被点击时，检测是否有其它附加组件对其开始了拖动操作。当鼠标被移到另一个标签页，且有附加组件覆盖了正常的拖放行为时，该操作会被开启。一个可以触发此事件的附加组件为 <a href=\"https://addons.mozilla.org/firefox/addon/multiple-tab-handler/\">Multiple Tab Handler</a> ，其允许通过长按一个标签页然后进行拖动来选中多个标签页。",
         "hash": "4c55ec5afa6862e468daf2aba7997dcf"
     },
     "options_preventCustomDraggedTabs": {
